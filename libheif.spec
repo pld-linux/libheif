@@ -3,18 +3,18 @@
 #
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Name:		libheif
-Version:	1.1.0
+Version:	1.3.2
 Release:	1
 License:	GPL
 Group:		Libraries
-Source0:	https://github.com/strukturag/libheif/releases/download/v1.1.0/%{name}-%{version}.tar.gz
-# Source0-md5:	a88c18e7ce1a62c23d6f0cf7293bb170
+Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
+# Source0-md5:	634b0d33db07c85eea2f56c1d8cb87b1
 URL:		https://github.com/strukturag/libheif
 BuildRequires:	libde265-devel
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 BuildRequires:	libx265-devel
-BuildRequires:	rpmbuild(macros) >= 1.213
+BuildRequires:	rpmbuild(macros) >= 1.734
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -59,9 +59,6 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 %description progs
 This package contains utility programs to convert HEIF files.
 
-%define         skip_post_check_so	libheif.so.1.1.0
-# Unresolved symbols found: _ZSt11__once_call: _ZSt15__once_callable
-
 %prep
 %setup -q
 
@@ -105,3 +102,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/heif-convert
 %attr(755,root,root) %{_bindir}/heif-enc
 %attr(755,root,root) %{_bindir}/heif-info
+%attr(755,root,root) %{_bindir}/heif-thumbnailer
+%{_datadir}/mime/packages/heif.xml
+%{_datadir}/thumbnailers/heif.thumbnailer
