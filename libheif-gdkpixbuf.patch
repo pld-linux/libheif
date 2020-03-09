@@ -1,11 +1,11 @@
---- libheif-1.5.1/gdk-pixbuf/Makefile.am.orig	2019-10-26 16:45:06.637424986 +0200
-+++ libheif-1.5.1/gdk-pixbuf/Makefile.am	2019-10-26 16:46:10.540412128 +0200
+--- libheif-1.6.2/gdk-pixbuf/Makefile.am.orig	2020-01-17 14:33:13.000000000 +0100
++++ libheif-1.6.2/gdk-pixbuf/Makefile.am	2020-03-09 16:12:26.688381122 +0100
 @@ -7,7 +7,7 @@
  libpixbufloader_heif_la_DEPENDENCIES = ../libheif/libheif.la
  libpixbufloader_heif_la_CFLAGS = -I$(top_srcdir) -I$(top_builddir) $(gdkpixbuf_CFLAGS)
  libpixbufloader_heif_la_LIBADD = ../libheif/libheif.la $(gdkpixbuf_LIBS)
--libpixbufloader_heif_la_LDFLAGS = -avoid-version
-+libpixbufloader_heif_la_LDFLAGS = -avoid-version -shared
+-libpixbufloader_heif_la_LDFLAGS = -avoid-version -module
++libpixbufloader_heif_la_LDFLAGS = -avoid-version -module -shared
  libpixbufloader_heif_la_SOURCES = pixbufloader-heif.c
  endif
  
