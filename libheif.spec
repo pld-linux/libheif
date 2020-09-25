@@ -5,16 +5,17 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.6.2
+Version:	1.9.0
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	8e6084cdd575267e5f1ef33e79cf3d9c
+# Source0-md5:	8a03d009e521653654ec78ea34bd96e8
 Patch0:		%{name}-pc.patch
 Patch1:		%{name}-gdkpixbuf.patch
 URL:		https://github.com/strukturag/libheif
+BuildRequires:	aom-devel
 BuildRequires:	autoconf >= 2.68
 BuildRequires:	automake >= 1:1.13
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
@@ -24,6 +25,7 @@ BuildRequires:	libpng-devel
 BuildRequires:	libstdc++-devel >= 6:4.7
 BuildRequires:	libtool >= 2:2
 BuildRequires:	libx265-devel
+BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.734
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -57,6 +59,7 @@ Summary(pl.UTF-8):	Pliki nagłówkowe libheif
 License:	LGPL v3+
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	aom-devel
 Requires:	libde265-devel
 Requires:	libstdc++-devel >= 6:4.7
 Requires:	libx265-devel
@@ -166,6 +169,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/heif-enc
 %attr(755,root,root) %{_bindir}/heif-info
 %attr(755,root,root) %{_bindir}/heif-thumbnailer
+%{_datadir}/mime/packages/avif.xml
 %{_datadir}/mime/packages/heif.xml
 %{_datadir}/thumbnailers/heif.thumbnailer
 %{_mandir}/man1/heif-convert.1*
