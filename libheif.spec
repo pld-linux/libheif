@@ -1,23 +1,25 @@
 #
 # Conditional build:
+%bcond_with	golang	# Go examples
 %bcond_without	tests	# don't perform "make check"
+%bcond_without	rav1e	# rav1e encoder
 #
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.9.1
+Version:	1.11.0
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	3e7462f4c864209c438256dc019cbbd0
-Patch0:		%{name}-pc.patch
-Patch1:		%{name}-gdkpixbuf.patch
+# Source0-md5:	1927b1507d33eaf2b8714239d9dbbde8
+Patch0:		%{name}-gdkpixbuf.patch
 URL:		https://github.com/strukturag/libheif
 BuildRequires:	aom-devel
 BuildRequires:	autoconf >= 2.68
 BuildRequires:	automake >= 1:1.13
+BuildRequires:	dav1d-devel
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
 BuildRequires:	libde265-devel
 BuildRequires:	libjpeg-devel
@@ -26,6 +28,7 @@ BuildRequires:	libstdc++-devel >= 6:4.7
 BuildRequires:	libtool >= 2:2
 BuildRequires:	libx265-devel
 BuildRequires:	pkgconfig
+%{?with_rav1e:BuildRequires:	rav1e-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -60,9 +63,11 @@ License:	LGPL v3+
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	aom-devel
+Requires:	dav1d-devel
 Requires:	libde265-devel
 Requires:	libstdc++-devel >= 6:4.7
 Requires:	libx265-devel
+%{?with_rav1e:Requires:	rav1e-devel}
 
 %description devel
 The header files are only needed for development of programs using the
@@ -113,7 +118,6 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 %build
 %{__libtoolize}
@@ -122,9 +126,8 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 %{__autoheader}
 %{__automake}
 %configure \
-%ifarch x32
-	--disable-go
-%endif
+	%{!?with_golang:--disable-go} \
+	%{!?with_rav1e:--disable-rav1e}
 
 %{__make}
 
