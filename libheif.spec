@@ -4,6 +4,9 @@
 %bcond_without	tests	# don't perform "make check"
 %bcond_without	rav1e	# rav1e encoder
 #
+%ifnarch %{ix86} %{x8664} aarch64
+%undefine	with_rav1e
+%endif
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
