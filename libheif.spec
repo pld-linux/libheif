@@ -10,13 +10,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.11.0
+Version:	1.12.0
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	1927b1507d33eaf2b8714239d9dbbde8
+# Source0-md5:	f6dd5c4fe0efb8598eb63df71213d58b
 Patch0:		%{name}-gdkpixbuf.patch
 URL:		https://github.com/strukturag/libheif
 BuildRequires:	aom-devel
