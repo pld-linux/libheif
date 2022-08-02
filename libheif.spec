@@ -11,7 +11,7 @@ Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
 Version:	1.12.0
-Release:	2
+Release:	3
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
@@ -24,7 +24,7 @@ BuildRequires:	autoconf >= 2.68
 BuildRequires:	automake >= 1:1.13
 BuildRequires:	dav1d-devel
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
-BuildRequires:	libde265-devel
+BuildRequires:	libde265-devel >= 1.0.7
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 BuildRequires:	libstdc++-devel >= 6:4.7
@@ -33,6 +33,7 @@ BuildRequires:	libx265-devel
 BuildRequires:	pkgconfig
 %{?with_rav1e:BuildRequires:	rav1e-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
+Requires:	libde265 >= 1.0.7
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -67,7 +68,7 @@ Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	aom-devel
 Requires:	dav1d-devel
-Requires:	libde265-devel
+Requires:	libde265-devel >= 1.0.7
 Requires:	libstdc++-devel >= 6:4.7
 Requires:	libx265-devel
 %{?with_rav1e:Requires:	rav1e-devel}
