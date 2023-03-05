@@ -1,7 +1,9 @@
+# TODO: switch to cmake and use plugin loading?
 #
 # Conditional build:
 %bcond_with	golang	# Go examples
-%bcond_without	tests	# don't perform "make check"
+%bcond_without	tests	# testing
+%bcond_with	svtav1	# SVT-AV1 encoder
 %bcond_without	rav1e	# rav1e encoder
 #
 %ifnarch %{ix86} %{x8664} aarch64
@@ -10,13 +12,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.12.0
-Release:	3
+Version:	1.15.1
+Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	f6dd5c4fe0efb8598eb63df71213d58b
+# Source0-md5:	220c2e35176cf88b48f943b0cdd0fd8e
 Patch0:		%{name}-gdkpixbuf.patch
 URL:		https://github.com/strukturag/libheif
 BuildRequires:	aom-devel
@@ -24,6 +26,7 @@ BuildRequires:	autoconf >= 2.68
 BuildRequires:	automake >= 1:1.13
 BuildRequires:	dav1d-devel
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
+%{?with_golang:BuildRequires:	golang >= 1.6}
 BuildRequires:	libde265-devel >= 1.0.7
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
@@ -32,6 +35,7 @@ BuildRequires:	libtool >= 2:2
 BuildRequires:	libx265-devel
 BuildRequires:	pkgconfig
 %{?with_rav1e:BuildRequires:	rav1e-devel}
+%{?with_svtav1:BuildRequires:	svt-av1-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
 Requires:	libde265 >= 1.0.7
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -131,7 +135,8 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 %{__automake}
 %configure \
 	%{!?with_golang:--disable-go} \
-	%{!?with_rav1e:--disable-rav1e}
+	%{!?with_rav1e:--disable-rav1e} \
+	%{?with_svtav1:--enable-svt}
 
 %{__make}
 
@@ -176,8 +181,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/heif-enc
 %attr(755,root,root) %{_bindir}/heif-info
 %attr(755,root,root) %{_bindir}/heif-thumbnailer
-%{_datadir}/mime/packages/avif.xml
-%{_datadir}/mime/packages/heif.xml
 %{_datadir}/thumbnailers/heif.thumbnailer
 %{_mandir}/man1/heif-convert.1*
 %{_mandir}/man1/heif-enc.1*
