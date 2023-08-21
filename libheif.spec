@@ -1,10 +1,12 @@
-# TODO: switch to cmake and use plugin loading?
 #
 # Conditional build:
-%bcond_with	golang	# Go examples
-%bcond_without	tests	# testing
-%bcond_with	svtav1	# SVT-AV1 encoder
-%bcond_without	rav1e	# rav1e encoder
+%bcond_with	golang		# Go examples
+%bcond_without	static_libs	# static library
+%bcond_with	tests		# testing
+%bcond_without	aom		# aom AVIF decoder/encoder
+%bcond_without	dav1d		# dav1d AVIF decoder
+%bcond_without	svtav1		# SVT-AV1 AVIF encoder
+%bcond_without	rav1e		# rav1e AVIF encoder
 #
 %ifnarch %{ix86} %{x8664} aarch64
 %undefine	with_rav1e
@@ -12,26 +14,24 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.15.1
+Version:	1.16.2
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	220c2e35176cf88b48f943b0cdd0fd8e
-Patch0:		%{name}-gdkpixbuf.patch
+# Source0-md5:	e6bec8efc317b56d85884197ad874f0a
 URL:		https://github.com/strukturag/libheif
-BuildRequires:	aom-devel
-BuildRequires:	autoconf >= 2.68
-BuildRequires:	automake >= 1:1.13
-BuildRequires:	dav1d-devel
+%{?with_aom:BuildRequires:	aom-devel}
+BuildRequires:	cmake >= 3.0
+%{?with_dav1d:BuildRequires:	dav1d-devel}
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
 %{?with_golang:BuildRequires:	golang >= 1.6}
 BuildRequires:	libde265-devel >= 1.0.7
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
+BuildRequires:	libsharpyuv-devel
 BuildRequires:	libstdc++-devel >= 6:4.7
-BuildRequires:	libtool >= 2:2
 BuildRequires:	libx265-devel
 BuildRequires:	pkgconfig
 %{?with_rav1e:BuildRequires:	rav1e-devel}
@@ -70,12 +70,11 @@ Summary(pl.UTF-8):	Pliki nagłówkowe libheif
 License:	LGPL v3+
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	aom-devel
-Requires:	dav1d-devel
+%{?with_aom:Requires:	aom-devel}
 Requires:	libde265-devel >= 1.0.7
+Requires:	libsharpyuv-devel
 Requires:	libstdc++-devel >= 6:4.7
 Requires:	libx265-devel
-%{?with_rav1e:Requires:	rav1e-devel}
 
 %description devel
 The header files are only needed for development of programs using the
@@ -125,18 +124,34 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 
 %prep
 %setup -q
-%patch0 -p1
 
 %build
-%{__libtoolize}
-%{__aclocal} -I m4
-%{__autoconf}
-%{__autoheader}
-%{__automake}
-%configure \
-	%{!?with_golang:--disable-go} \
-	%{!?with_rav1e:--disable-rav1e} \
-	%{?with_svtav1:--enable-svt}
+%if %{with static_libs}
+install -d build-static
+cd build-static
+%cmake .. \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DENABLE_PLUGIN_LOADING=OFF \
+	%{!?with_aom:-DWITH_AOM_DECODER=OFF} \
+	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
+	%{!?with_dav1d:-DWITH_DAV1D=OFF} \
+	%{!?with_rav1e:-DWITH_RAV1E=OFF} \
+	%{!?with_svtav1:-DWITH_SvtEnc=OFF}
+
+%{__make}
+cd ..
+%endif
+
+install -d build
+cd build
+%cmake .. \
+	%{?with_tests:-DBUILD_TESTING=ON} \
+	%{!?with_aom:-DWITH_AOM_DECODER=OFF} \
+	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
+	%{!?with_dav1d:-DWITH_DAV1D=OFF} \
+	-DWITH_DAV1D_PLUGIN=ON \
+	%{!?with_rav1e:-DWITH_RAV1E=OFF} \
+	%{!?with_svtav1:-DWITH_SvtEnc=OFF}
 
 %{__make}
 
@@ -145,13 +160,13 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%if %{with static_libs}
+%{__make} -C build-static install \
 	DESTDIR=$RPM_BUILD_ROOT
+%endif
 
-# module loaded via gmodule
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/gdk-pixbuf-2.0/2.*/loaders/*.la
-# obsoleted by pkg-config
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/libheif.la
+%{__make} -C build install \
+	DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -164,12 +179,24 @@ rm -rf $RPM_BUILD_ROOT
 %doc README.md
 %attr(755,root,root) %{_libdir}/libheif.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libheif.so.1
+%dir %{_libdir}/libheif
+# TODO: subpackages with plugins?
+%if %{with dav1d}
+%attr(755,root,root) %{_libdir}/libheif/libheif-dav1d.so
+%endif
+%if %{with rav1e}
+%attr(755,root,root) %{_libdir}/libheif/libheif-rav1e.so
+%endif
+%if %{with svtav1}
+%attr(755,root,root) %{_libdir}/libheif/libheif-svtenc.so
+%endif
 
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libheif.so
 %{_includedir}/libheif
 %{_pkgconfigdir}/libheif.pc
+%{_libdir}/cmake/libheif
 
 %files static
 %defattr(644,root,root,755)
