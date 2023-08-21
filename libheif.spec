@@ -198,9 +198,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_pkgconfigdir}/libheif.pc
 %{_libdir}/cmake/libheif
 
+%if %{with static_libs}
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/libheif.a
+%endif
 
 %files progs
 %defattr(644,root,root,755)
