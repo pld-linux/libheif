@@ -1,43 +1,58 @@
+# MAYBE TODO: default codecs (aom, libde265, x265, jpeg) as plugins, package plugins in subpackages?
 #
 # Conditional build:
 %bcond_with	golang		# Go examples
 %bcond_without	static_libs	# static library
 %bcond_with	tests		# testing
+# AVIF
 %bcond_without	aom		# aom AVIF decoder/encoder
-%bcond_without	dav1d		# dav1d AVIF decoder
-%bcond_without	svtav1		# SVT-AV1 AVIF encoder
-%bcond_without	rav1e		# rav1e AVIF encoder
-#
+%bcond_with	dav1d		# dav1d AVIF decoder
+%bcond_with	svtav1		# SVT-AV1 AVIF encoder
+%bcond_with	rav1e		# rav1e AVIF encoder
+# HEVC
+%bcond_with	ffmpeg		# FFmpeg HEVC decoder (hw accelerated)
+%bcond_with	kvazaar		# kvazaar HEVC encoder
+%bcond_without	libde265	# libde265 HEVC decoder
+%bcond_without	x265		# x265 HEVC encoder
+# JPEG
+%bcond_without	jpeg		# JPEG codecs support
+# JPEG-2000
+%bcond_without	openjpeg	# OpenJPEG (J2K) codecs support
+
 %ifnarch %{ix86} %{x8664} aarch64
 %undefine	with_rav1e
 %endif
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.16.2
+Version:	1.17.1
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	e6bec8efc317b56d85884197ad874f0a
+# Source0-md5:	7a5b2a82de971209cac999de20e0e95f
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
-BuildRequires:	cmake >= 3.0
+BuildRequires:	cmake >= 3.16.3
 %{?with_dav1d:BuildRequires:	dav1d-devel}
+# libavcodec
+%{?with_ffmpeg:BuildRequires:	ffmpeg-devel}
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
 %{?with_golang:BuildRequires:	golang >= 1.6}
-BuildRequires:	libde265-devel >= 1.0.7
-BuildRequires:	libjpeg-devel
+%{?with_kvazaar:BuildRequires:	kvazaar-devel}
+%{?with_libde265:BuildRequires:	libde265-devel >= 1.0.7}
+%{?with_jpeg:BuildRequires:	libjpeg-devel}
 BuildRequires:	libpng-devel
 BuildRequires:	libsharpyuv-devel
 BuildRequires:	libstdc++-devel >= 6:4.7
-BuildRequires:	libx265-devel
+%{?with_x265:BuildRequires:	libx265-devel}
+%{?with_openjpeg:BuildRequires:	openjpeg2-devel >= 2}
 BuildRequires:	pkgconfig
 %{?with_rav1e:BuildRequires:	rav1e-devel}
 %{?with_svtav1:BuildRequires:	svt-av1-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
-Requires:	libde265 >= 1.0.7
+%{?with_libde265:Requires:	libde265 >= 1.0.7}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -127,35 +142,47 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 
 %build
 %if %{with static_libs}
-install -d build-static
-cd build-static
-%cmake .. \
+%cmake -B build-static \
 	-DBUILD_SHARED_LIBS=OFF \
 	-DENABLE_PLUGIN_LOADING=OFF \
 	%{!?with_aom:-DWITH_AOM_DECODER=OFF} \
 	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
-	%{!?with_dav1d:-DWITH_DAV1D=OFF} \
-	%{!?with_rav1e:-DWITH_RAV1E=OFF} \
-	%{!?with_svtav1:-DWITH_SvtEnc=OFF}
+	%{?with_dav1d:-DWITH_DAV1D=ON} \
+	%{?with_ffmpeg:-DWITH_FFMPEG_DECODER=ON} \
+	%{?with_jpeg:-DWITH_JPEG_DECODER=ON} \
+	%{?with_jpeg:-DWITH_JPEG_ENCODER=ON} \
+	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
+	%{!?with_libde265:-DWITH_LIBDE265=OFF} \
+	%{?with_openjpeg:-DWITH_OpenJPEG_DECODER=ON} \
+	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
+	%{?with_rav1e:-DWITH_RAV1E=ON} \
+	%{?with_svtav1:-DWITH_SvtEnc=ON} \
+	%{!?with_x265:-DWITH_X265=OFF}
 
-%{__make}
-cd ..
+%{__make} -C build-static
 %endif
 
-install -d build
-cd build
-%cmake .. \
+%cmake -B build \
 	%{?with_tests:-DBUILD_TESTING=ON} \
 	%{!?with_aom:-DWITH_AOM_DECODER=OFF} \
 	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
-	%{!?with_dav1d:-DWITH_DAV1D=OFF} \
-	-DWITH_DAV1D_PLUGIN=ON \
-	%{!?with_rav1e:-DWITH_RAV1E=OFF} \
-	%{!?with_svtav1:-DWITH_SvtEnc=OFF}
+	%{?with_dav1d:-DWITH_DAV1D=ON} \
+	%{?with_ffmpeg:-DWITH_FFMPEG_DECODER=ON} \
+	%{?with_ffmpeg:-DWITH_FFMPEG_DECODER_PLUGIN=ON} \
+	%{?with_jpeg:-DWITH_JPEG_DECODER=ON} \
+	%{?with_jpeg:-DWITH_JPEG_ENCODER=ON} \
+	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
+	%{?with_kvazaar:-DWITH_KVAZAAR_PLUGIN=ON} \
+	%{!?with_libde265:-DWITH_LIBDE265=OFF} \
+	%{?with_openjpeg:-DWITH_OpenJPEG_DECODER=ON} \
+	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
+	%{?with_rav1e:-DWITH_RAV1E=ON} \
+	%{?with_svtav1:-DWITH_SvtEnc=ON} \
+	%{!?with_x265:-DWITH_X265=OFF}
 
-%{__make}
+%{__make} -C build
 
-%{?with_tests:%{__make} check}
+%{?with_tests:%{__make} -C build check}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -183,6 +210,16 @@ rm -rf $RPM_BUILD_ROOT
 # TODO: subpackages with plugins?
 %if %{with dav1d}
 %attr(755,root,root) %{_libdir}/libheif/libheif-dav1d.so
+%endif
+%if %{with ffmpeg}
+%attr(755,root,root) %{_libdir}/libheif/libheif-ffmpegdec.so
+%endif
+%if %{with openjpeg}
+%attr(755,root,root) %{_libdir}/libheif/libheif-j2kdec.so
+%attr(755,root,root) %{_libdir}/libheif/libheif-j2kenc.so
+%endif
+%if %{with kvazaar}
+%attr(755,root,root) %{_libdir}/libheif/libheif-kvazaar.so
 %endif
 %if %{with rav1e}
 %attr(755,root,root) %{_libdir}/libheif/libheif-rav1e.so
