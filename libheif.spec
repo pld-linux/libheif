@@ -1,4 +1,5 @@
 # MAYBE TODO: default codecs (aom, libde265, x265, jpeg) as plugins, package plugins in subpackages?
+# TODO: uvg266 vvdec>=2.3.0 vvenc>=1.12.0 openjph
 #
 # Conditional build:
 %bcond_with	golang		# Go examples
@@ -25,13 +26,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.17.6
+Version:	1.18.2
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	563e2ecd15f1ca98ccb13388ee873ebe
+# Source0-md5:	5446af621e88be0edc9373c22c198007
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
 BuildRequires:	cmake >= 3.16.3
@@ -243,12 +244,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files progs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/heif-convert
+%attr(755,root,root) %{_bindir}/heif-dec
 %attr(755,root,root) %{_bindir}/heif-enc
 %attr(755,root,root) %{_bindir}/heif-info
 %attr(755,root,root) %{_bindir}/heif-thumbnailer
 %{_datadir}/thumbnailers/heif.thumbnailer
-%{_mandir}/man1/heif-convert.1*
+%{_mandir}/man1/heif-dec.1*
 %{_mandir}/man1/heif-enc.1*
 %{_mandir}/man1/heif-info.1*
 %{_mandir}/man1/heif-thumbnailer.1*
