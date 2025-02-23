@@ -1,5 +1,5 @@
 # MAYBE TODO: default codecs (aom, libde265, x265, jpeg) as plugins, package plugins in subpackages?
-# TODO: uvg266 vvdec>=2.3.0 vvenc>=1.12.0 openjph
+# TODO: openjph (-DOPENJPG_ENCODER=ON)
 #
 # Conditional build:
 %bcond_with	golang		# Go examples
@@ -19,6 +19,10 @@
 %bcond_without	jpeg		# JPEG codecs support
 # JPEG-2000
 %bcond_without	openjpeg	# OpenJPEG (J2K) codecs support
+# VVC
+%bcond_with	uvg266		# uvg266 VVC encoder (experimental)
+%bcond_with	vvdec		# vvdec VVC decoder (experimental)
+%bcond_with	vvenc		# vvenc VVC decoder (experimental)
 
 %ifnarch %{ix86} %{x8664} aarch64
 %undefine	with_rav1e
@@ -26,13 +30,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.18.2
+Version:	1.19.5
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	5446af621e88be0edc9373c22c198007
+# Source0-md5:	68a0b8924696b183e640fa03b73eca0c
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
 BuildRequires:	cmake >= 3.16.3
@@ -46,13 +50,17 @@ BuildRequires:	gdk-pixbuf2-devel >= 2.0
 %{?with_jpeg:BuildRequires:	libjpeg-devel}
 BuildRequires:	libpng-devel
 BuildRequires:	libsharpyuv-devel
-BuildRequires:	libstdc++-devel >= 6:4.7
+# C++20
+BuildRequires:	libstdc++-devel >= 6:8
 %{?with_x265:BuildRequires:	libx265-devel}
 %{?with_openjpeg:BuildRequires:	openjpeg2-devel >= 2}
 BuildRequires:	pkgconfig
 %{?with_rav1e:BuildRequires:	rav1e-devel}
 %{?with_svtav1:BuildRequires:	svt-av1-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
+%{?with_uvg266:BuildRequires:	uvg266-devel}
+%{?with_vvdec:BuildRequires:	vvdec-devel >= 2.3.0}
+%{?with_vvenc:BuildRequires:	vvenc-devel >= 1.12.0}
 %{?with_libde265:Requires:	libde265 >= 1.0.7}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -158,6 +166,9 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
 	%{?with_rav1e:-DWITH_RAV1E=ON} \
 	%{?with_svtav1:-DWITH_SvtEnc=ON} \
+	%{?with_uvg266:-DWITH_UVG266=ON} \
+	%{?with_vvdec:-DWITH_VVDEC=ON} \
+	%{?with_vvenc:-DWITH_VVENC=ON} \
 	%{!?with_x265:-DWITH_X265=OFF}
 
 %{__make} -C build-static
@@ -179,6 +190,9 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
 	%{?with_rav1e:-DWITH_RAV1E=ON} \
 	%{?with_svtav1:-DWITH_SvtEnc=ON} \
+	%{?with_uvg266:-DWITH_UVG266=ON} \
+	%{?with_vvdec:-DWITH_VVDEC=ON} \
+	%{?with_vvenc:-DWITH_VVENC=ON} \
 	%{!?with_x265:-DWITH_X265=OFF}
 
 %{__make} -C build
