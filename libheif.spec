@@ -3,7 +3,7 @@
 #
 # Conditional build:
 %bcond_with	golang		# Go examples
-%bcond_without	static_libs	# static library
+%bcond_with	static_libs	# static library
 %bcond_with	tests		# testing
 # AVIF
 %bcond_without	aom		# aom AVIF decoder/encoder
@@ -31,7 +31,7 @@ Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
 Version:	1.19.5
-Release:	1
+Release:	2
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
@@ -154,6 +154,7 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 %cmake -B build-static \
 	-DBUILD_SHARED_LIBS=OFF \
 	-DENABLE_PLUGIN_LOADING=OFF \
+	-DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
 	%{!?with_aom:-DWITH_AOM_DECODER=OFF} \
 	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
 	%{?with_dav1d:-DWITH_DAV1D=ON} \
@@ -175,6 +176,7 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 %endif
 
 %cmake -B build \
+	-DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
 	%{?with_tests:-DBUILD_TESTING=ON} \
 	%{!?with_aom:-DWITH_AOM_DECODER=OFF} \
 	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
