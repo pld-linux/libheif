@@ -1,5 +1,4 @@
 # MAYBE TODO: default codecs (aom, libde265, x265, jpeg) as plugins, package plugins in subpackages?
-# TODO: openjph (-DOPENJPG_ENCODER=ON)
 #
 # Conditional build:
 %bcond_with	golang		# Go examples
@@ -19,6 +18,8 @@
 %bcond_without	jpeg		# JPEG codecs support
 # JPEG-2000
 %bcond_without	openjpeg	# OpenJPEG (J2K) codecs support
+# JPEG-2000-HT
+%bcond_without	openjph		# OpenJPH (HTJ2K) encoder support
 # VVC
 %bcond_with	uvg266		# uvg266 VVC encoder (experimental)
 %bcond_with	vvdec		# vvdec VVC decoder (experimental)
@@ -30,13 +31,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.19.5
-Release:	2
+Version:	1.19.7
+Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	68a0b8924696b183e640fa03b73eca0c
+# Source0-md5:	cbb49df3d35360d228bac47f4287f2b8
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
 BuildRequires:	cmake >= 3.16.3
@@ -54,13 +55,16 @@ BuildRequires:	libsharpyuv-devel
 BuildRequires:	libstdc++-devel >= 6:8
 %{?with_x265:BuildRequires:	libx265-devel}
 %{?with_openjpeg:BuildRequires:	openjpeg2-devel >= 2}
+%{?with_openjph:BuildRequires:	openjph-devel}
 BuildRequires:	pkgconfig
 %{?with_rav1e:BuildRequires:	rav1e-devel}
 %{?with_svtav1:BuildRequires:	svt-av1-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
 %{?with_uvg266:BuildRequires:	uvg266-devel}
 %{?with_vvdec:BuildRequires:	vvdec-devel >= 2.3.0}
+%{?with_vvdec:BuildRequires:	vvdec-devel < 3}
 %{?with_vvenc:BuildRequires:	vvenc-devel >= 1.12.0}
+%{?with_vvenc:BuildRequires:	vvenc-devel < 1.13}
 %{?with_libde265:Requires:	libde265 >= 1.0.7}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -163,6 +167,7 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_jpeg:-DWITH_JPEG_ENCODER=ON} \
 	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
 	%{!?with_libde265:-DWITH_LIBDE265=OFF} \
+	%{?with_openjph:-DWITH_OPENJPH_ENCODER=ON} \
 	%{?with_openjpeg:-DWITH_OpenJPEG_DECODER=ON} \
 	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
 	%{?with_rav1e:-DWITH_RAV1E=ON} \
