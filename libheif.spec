@@ -23,7 +23,7 @@
 # VVC
 %bcond_with	uvg266		# uvg266 VVC encoder (experimental)
 %bcond_with	vvdec		# vvdec VVC decoder (experimental)
-%bcond_with	vvenc		# vvenc VVC decoder (experimental)
+%bcond_with	vvenc		# vvenc VVC encoder (experimental)
 
 %ifnarch %{ix86} %{x8664} aarch64
 %undefine	with_rav1e
@@ -31,13 +31,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.19.7
-Release:	4
+Version:	1.20.2
+Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	cbb49df3d35360d228bac47f4287f2b8
+# Source0-md5:	5d0442f7197a34b7aaf95bdffabb51e9
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
 BuildRequires:	cmake >= 3.16.3
@@ -227,7 +227,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc README.md
 %attr(755,root,root) %{_libdir}/libheif.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libheif.so.1
+%ghost %{_libdir}/libheif.so.1
 %dir %{_libdir}/libheif
 # TODO: subpackages with plugins?
 %if %{with dav1d}
@@ -252,7 +252,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libheif.so
+%{_libdir}/libheif.so
 %{_includedir}/libheif
 %{_pkgconfigdir}/libheif.pc
 %{_libdir}/cmake/libheif
@@ -269,6 +269,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/heif-enc
 %attr(755,root,root) %{_bindir}/heif-info
 %attr(755,root,root) %{_bindir}/heif-thumbnailer
+%attr(755,root,root) %{_bindir}/heif-view
 %{_datadir}/thumbnailers/heif.thumbnailer
 %{_mandir}/man1/heif-dec.1*
 %{_mandir}/man1/heif-enc.1*
