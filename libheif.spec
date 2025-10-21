@@ -65,7 +65,7 @@ BuildRequires:	rpmbuild(macros) >= 1.734
 %{?with_vvdec:BuildRequires:	vvdec-devel < 3}
 %{?with_vvenc:BuildRequires:	vvenc-devel >= 1.12.0}
 %{?with_vvenc:BuildRequires:	vvenc-devel < 1.13}
-%{?with_libde265:Requires:	libde265 >= 1.0.7}
+%{?with_libde265:Requires:	libde265%{?_isa} >= 1.0.7}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -97,12 +97,12 @@ Summary(de.UTF-8):	libheif Headers
 Summary(pl.UTF-8):	Pliki nagłówkowe libheif
 License:	LGPL v3+
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
-%{?with_aom:Requires:	aom-devel}
-Requires:	libde265-devel >= 1.0.7
-Requires:	libsharpyuv-devel
-Requires:	libstdc++-devel >= 6:4.7
-Requires:	libx265-devel
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+%{?with_aom:Requires:	aom-devel%{?_isa}}
+Requires:	libde265-devel%{?_isa} >= 1.0.7
+Requires:	libsharpyuv-devel%{?_isa}
+Requires:	libstdc++-devel%{?_isa} >= 6:4.7
+Requires:	libx265-devel%{?_isa}
 
 %description devel
 The header files are only needed for development of programs using the
@@ -117,7 +117,7 @@ Summary:	Static libheif library
 Summary(pl.UTF-8):	Statyczna biblioteka libheif
 License:	LGPL v3+
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
+Requires:	%{name}-devel%{?_isa} = %{version}-%{release}
 
 %description static
 Static libheif library.
@@ -130,7 +130,7 @@ Summary:	libheif utility programs
 Summary(pl.UTF-8):	Programy narzędziowe libheif
 License:	GPL v3+
 Group:		Applications/Graphics
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}%{?_isa} = %{version}-%{release}
 
 %description progs
 This package contains utility programs to convert HEIF files.
@@ -142,7 +142,7 @@ Ten pakiet zawiera programy narzędziowe do konwersji plików HEIF.
 Summary:	gdk-pixbuf plugin to handle HEIF files
 Summary(pl.UTF-8):	Wtyczka gdk-pixbuf do obsługi plików HEIF
 Group:		Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}%{?_isa} = %{version}-%{release}
 
 %description -n gdk-pixbuf2-loader-heif
 gdk-pixbuf plugin to handle HEIF files.
