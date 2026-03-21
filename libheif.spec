@@ -1,9 +1,12 @@
-# MAYBE TODO: default codecs (aom, libde265, x265, jpeg) as plugins, package plugins in subpackages?
+# MAYBE TODO: default codecs (openh264, x264, aom, libde265, x265, jpeg, vvdec, vvenc) as plugins, package plugins in subpackages?
 #
 # Conditional build:
 %bcond_with	golang		# Go examples
 %bcond_with	static_libs	# static library
 %bcond_with	tests		# testing
+# AVC
+%bcond_without	openh264	# OpenH264 AVC decoder
+%bcond_without	x264		# x264 AVC encoder
 # AVIF
 %bcond_without	aom		# aom AVIF decoder/encoder
 %bcond_with	dav1d		# dav1d AVIF decoder
@@ -21,9 +24,9 @@
 # JPEG-2000-HT
 %bcond_without	openjph		# OpenJPH (HTJ2K) encoder support
 # VVC
-%bcond_with	uvg266		# uvg266 VVC encoder (experimental)
-%bcond_with	vvdec		# vvdec VVC decoder (experimental)
-%bcond_with	vvenc		# vvenc VVC encoder (experimental)
+%bcond_with	uvg266		# uvg266 VVC encoder
+%bcond_without	vvdec		# vvdec VVC decoder
+%bcond_without	vvenc		# vvenc VVC encoder
 
 %ifnarch %{ix86} %{x8664} aarch64
 %undefine	with_rav1e
@@ -31,13 +34,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.20.2
+Version:	1.21.2
 Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	5d0442f7197a34b7aaf95bdffabb51e9
+# Source0-md5:	bee744908edb9d5957cb37fb0b1c6e8f
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
 BuildRequires:	cmake >= 3.16.3
@@ -53,7 +56,9 @@ BuildRequires:	libpng-devel
 BuildRequires:	libsharpyuv-devel
 # C++20
 BuildRequires:	libstdc++-devel >= 6:8
+%{?with_x264:BuildRequires:	libx264-devel}
 %{?with_x265:BuildRequires:	libx265-devel}
+%{?with_openh264:BuildRequires:	openh264-devel}
 %{?with_openjpeg:BuildRequires:	openjpeg2-devel >= 2}
 %{?with_openjph:BuildRequires:	openjph-devel}
 BuildRequires:	pkgconfig
@@ -61,10 +66,8 @@ BuildRequires:	pkgconfig
 %{?with_svtav1:BuildRequires:	svt-av1-devel}
 BuildRequires:	rpmbuild(macros) >= 1.734
 %{?with_uvg266:BuildRequires:	uvg266-devel}
-%{?with_vvdec:BuildRequires:	vvdec-devel >= 2.3.0}
-%{?with_vvdec:BuildRequires:	vvdec-devel < 3}
+%{?with_vvdec:BuildRequires:	vvdec-devel >= 3.0.0}
 %{?with_vvenc:BuildRequires:	vvenc-devel >= 1.12.0}
-%{?with_vvenc:BuildRequires:	vvenc-devel < 1.13}
 %{?with_libde265:Requires:	libde265%{?_isa} >= 1.0.7}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -99,10 +102,11 @@ License:	LGPL v3+
 Group:		Development/Libraries
 Requires:	%{name}%{?_isa} = %{version}-%{release}
 %{?with_aom:Requires:	aom-devel%{?_isa}}
-Requires:	libde265-devel%{?_isa} >= 1.0.7
+%{?with_libde265:Requires:	libde265-devel%{?_isa} >= 1.0.7}
 Requires:	libsharpyuv-devel%{?_isa}
-Requires:	libstdc++-devel%{?_isa} >= 6:4.7
-Requires:	libx265-devel%{?_isa}
+Requires:	libstdc++-devel%{?_isa} >= 6:8
+%{?with_x265:Requires:	libx265-devel%{?_isa}}
+%{?with_openh264:Requires:	openh264-devel%{?_isa}}
 
 %description devel
 The header files are only needed for development of programs using the
@@ -168,13 +172,16 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
 	%{!?with_libde265:-DWITH_LIBDE265=OFF} \
 	%{?with_openjph:-DWITH_OPENJPH_ENCODER=ON} \
+	%{!?with_openh264:-DWITH_OpenH264_DECODER=OFF} \
 	%{?with_openjpeg:-DWITH_OpenJPEG_DECODER=ON} \
 	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
 	%{?with_rav1e:-DWITH_RAV1E=ON} \
 	%{?with_svtav1:-DWITH_SvtEnc=ON} \
+	-DWITH_UNCOMPRESSED_CODEC=ON \
 	%{?with_uvg266:-DWITH_UVG266=ON} \
 	%{?with_vvdec:-DWITH_VVDEC=ON} \
 	%{?with_vvenc:-DWITH_VVENC=ON} \
+	%{!?with_x264:-DWITH_X264=OFF} \
 	%{!?with_x265:-DWITH_X265=OFF}
 
 %{__make} -C build-static
@@ -193,6 +200,8 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
 	%{?with_kvazaar:-DWITH_KVAZAAR_PLUGIN=ON} \
 	%{!?with_libde265:-DWITH_LIBDE265=OFF} \
+	%{?with_openjph:-DWITH_OPENJPH_ENCODER=ON} \
+	%{!?with_openh264:-DWITH_OpenH264_DECODER=OFF} \
 	%{?with_openjpeg:-DWITH_OpenJPEG_DECODER=ON} \
 	%{?with_openjpeg:-DWITH_OpenJPEG_ENCODER=ON} \
 	%{?with_rav1e:-DWITH_RAV1E=ON} \
@@ -200,6 +209,7 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_uvg266:-DWITH_UVG266=ON} \
 	%{?with_vvdec:-DWITH_VVDEC=ON} \
 	%{?with_vvenc:-DWITH_VVENC=ON} \
+	%{!?with_x264:-DWITH_X264=OFF} \
 	%{!?with_x265:-DWITH_X265=OFF}
 
 %{__make} -C build
@@ -226,28 +236,31 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc README.md
-%attr(755,root,root) %{_libdir}/libheif.so.*.*.*
+%{_libdir}/libheif.so.*.*.*
 %ghost %{_libdir}/libheif.so.1
 %dir %{_libdir}/libheif
 # TODO: subpackages with plugins?
 %if %{with dav1d}
-%attr(755,root,root) %{_libdir}/libheif/libheif-dav1d.so
+%{_libdir}/libheif/libheif-dav1d.so
 %endif
 %if %{with ffmpeg}
-%attr(755,root,root) %{_libdir}/libheif/libheif-ffmpegdec.so
+%{_libdir}/libheif/libheif-ffmpegdec.so
 %endif
 %if %{with openjpeg}
-%attr(755,root,root) %{_libdir}/libheif/libheif-j2kdec.so
-%attr(755,root,root) %{_libdir}/libheif/libheif-j2kenc.so
+%{_libdir}/libheif/libheif-j2kdec.so
+%{_libdir}/libheif/libheif-j2kenc.so
+%endif
+%if %{with openjph}
+%{_libdir}/libheif/libheif-jphenc.so
 %endif
 %if %{with kvazaar}
-%attr(755,root,root) %{_libdir}/libheif/libheif-kvazaar.so
+%{_libdir}/libheif/libheif-kvazaar.so
 %endif
 %if %{with rav1e}
-%attr(755,root,root) %{_libdir}/libheif/libheif-rav1e.so
+%{_libdir}/libheif/libheif-rav1e.so
 %endif
 %if %{with svtav1}
-%attr(755,root,root) %{_libdir}/libheif/libheif-svtenc.so
+%{_libdir}/libheif/libheif-svtenc.so
 %endif
 
 %files devel
