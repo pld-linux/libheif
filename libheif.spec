@@ -34,13 +34,13 @@
 Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
-Version:	1.21.2
-Release:	2
+Version:	1.23.0
+Release:	1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
 Source0:	https://github.com/strukturag/libheif/releases/download/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	bee744908edb9d5957cb37fb0b1c6e8f
+# Source0-md5:	4da401e36c861c5adfe61225e0dcdd61
 URL:		https://github.com/strukturag/libheif
 %{?with_aom:BuildRequires:	aom-devel}
 BuildRequires:	cmake >= 3.16.3
@@ -50,6 +50,7 @@ BuildRequires:	cmake >= 3.16.3
 BuildRequires:	gdk-pixbuf2-devel >= 2.0
 %{?with_golang:BuildRequires:	golang >= 1.6}
 %{?with_kvazaar:BuildRequires:	kvazaar-devel}
+BuildRequires:	libbrotli-devel
 %{?with_libde265:BuildRequires:	libde265-devel >= 1.0.7}
 %{?with_jpeg:BuildRequires:	libjpeg-devel}
 BuildRequires:	libpng-devel
@@ -68,6 +69,7 @@ BuildRequires:	rpmbuild(macros) >= 1.734
 %{?with_uvg266:BuildRequires:	uvg266-devel}
 %{?with_vvdec:BuildRequires:	vvdec-devel >= 3.0.0}
 %{?with_vvenc:BuildRequires:	vvenc-devel >= 1.12.0}
+BuildRequires:	zlib-devel
 %{?with_libde265:Requires:	libde265%{?_isa} >= 1.0.7}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
