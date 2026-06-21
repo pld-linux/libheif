@@ -4,6 +4,7 @@
 %bcond_with	golang		# Go examples
 %bcond_with	static_libs	# static library
 %bcond_with	tests		# testing
+%bcond_without	gdkpixbuf	# gdk-pixbuf 2.x plugin
 # AVC
 %bcond_without	openh264	# OpenH264 AVC decoder
 %bcond_without	x264		# x264 AVC encoder
@@ -35,7 +36,7 @@ Summary:	ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
 Summary(pl.UTF-8):	Koder i dekoder formatu plików HEIF zgodnego z ISO/IEC 23008-12:2017
 Name:		libheif
 Version:	1.23.0
-Release:	1
+Release:	0.1
 License:	LGPL v3+ (library), GPL v3+ (tools)
 Group:		Libraries
 #Source0Download: https://github.com/strukturag/libheif/releases/
@@ -169,6 +170,7 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{!?with_aom:-DWITH_AOM_ENCODER=OFF} \
 	%{?with_dav1d:-DWITH_DAV1D=ON} \
 	%{?with_ffmpeg:-DWITH_FFMPEG_DECODER=ON} \
+	-DWITH_GDK_PIXBUF=OFF \
 	%{?with_jpeg:-DWITH_JPEG_DECODER=ON} \
 	%{?with_jpeg:-DWITH_JPEG_ENCODER=ON} \
 	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
@@ -197,6 +199,7 @@ Wtyczka gdk-pixbuf do obsługi plików HEIF.
 	%{?with_dav1d:-DWITH_DAV1D=ON} \
 	%{?with_ffmpeg:-DWITH_FFMPEG_DECODER=ON} \
 	%{?with_ffmpeg:-DWITH_FFMPEG_DECODER_PLUGIN=ON} \
+	%{!?with_gdkpixbuf:-DWITH_GDK_PIXBUF=OFF} \
 	%{?with_jpeg:-DWITH_JPEG_DECODER=ON} \
 	%{?with_jpeg:-DWITH_JPEG_ENCODER=ON} \
 	%{?with_kvazaar:-DWITH_KVAZAAR=ON} \
@@ -291,6 +294,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/heif-info.1*
 %{_mandir}/man1/heif-thumbnailer.1*
 
+%if %{with gdkpixbuf}
 %files -n gdk-pixbuf2-loader-heif
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/gdk-pixbuf-2.0/2.*/loaders/libpixbufloader-heif.so
+%endif
